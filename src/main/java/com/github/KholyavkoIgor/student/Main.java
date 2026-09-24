@@ -38,9 +38,6 @@ public class Main {
         // Сравнение студентов: одинаковый набор чисел, но разная кратность
         Student stewdent5 = new Student("Галина", List.of(1, 2, 3));
         Student stewdent6 = new Student("Галина", List.of(3, 3, 3));
-        System.out.println("s5 равен s6 (разная кратность): " + stewdent5.equals(stewdent6));
-
-
-
+        System.out.println("stewdent5 равен stewdent6 (разная кратность): " + stewdent5.equals(stewdent6));
     }
 }
