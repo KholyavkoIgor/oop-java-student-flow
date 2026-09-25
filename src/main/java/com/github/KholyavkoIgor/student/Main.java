@@ -1,21 +1,23 @@
 package com.github.KholyavkoIgor.student;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Точка входа приложения. Демонстрация примеров работы с классом {@link Student}.
  */
 public class Main {
     public static void main(String[] args){
+
         // имя + нет оценок
-        Student stewdent1 = new Student("Андрей");
+        Student<Integer> stewdent1 = new Student<>("Андрей");
         stewdent1.addGrade(3);
         stewdent1.addGrade(4);
         stewdent1.addGrade(5);
         System.out.println("Студент 1: "+ stewdent1);
 
         // имя + список оценок
-        Student stewdent2 = new Student("Борис", List.of(5, 4, 5));
+        Student<Integer> stewdent2 = new Student<>("Борис", List.of(5, 4, 5));
         System.out.println("Студент 2: " + stewdent2);
         stewdent1.setName("Алексей");
         System.out.println("Смена имени: " + stewdent1);
@@ -31,13 +33,30 @@ public class Main {
         System.out.println("После удаления оценки 3: " + stewdent1);
 
         // Сравнение студентов: одинаковые оценки, но разный порядок
-        Student stewdent3 = new Student("Виктор", List.of(1, 2, 3));
-        Student stewdent4 = new Student("Виктор", List.of(3, 2, 1));
+        Student<Integer> stewdent3 = new Student<>("Виктор", List.of(1, 2, 3));
+        Student<Integer> stewdent4 = new Student<>("Виктор", List.of(3, 2, 1));
         System.out.println("stewdent3 равен stewdent4 : "
                 + stewdent3.equals(stewdent4));
         // Сравнение студентов: одинаковый набор чисел, но разная кратность
-        Student stewdent5 = new Student("Галина", List.of(1, 2, 3));
-        Student stewdent6 = new Student("Галина", List.of(3, 3, 3));
+        Student<Integer> stewdent5 = new Student<>("Галина", List.of(1, 2, 3));
+        Student<Integer> stewdent6 = new Student<>("Галина", List.of(3, 3, 3));
         System.out.println("stewdent5 равен stewdent6 (разная кратность): " + stewdent5.equals(stewdent6));
+
+        /*
+        Predicate<Integer> evenOnly = x -> x % 2 == 0;
+        Student<Integer> stewdent7 = new Student<>("Дмитрий", evenOnly);
+        stewdent7.addGrade(4);
+        stewdent7.addGrade(3);//InvalidGradeException
+        */
+
+        Predicate<String> neDiff = s -> s.equals("зачет") || s.equals("незачет");
+        Student<String> stewdent8 = new Student<>("Егор", neDiff);
+        stewdent8.addGrade("зачет");
+        stewdent8.addGrade("зачет");
+        stewdent8.addGrade("незачет");
+        System.out.println("stewdent8 не равен stewdent6 (inconvertible types): " + stewdent8.equals(stewdent6));
+        System.out.println("Оценки студента " + stewdent8.getName() + ": "
+                + stewdent8.getGrades());
+
     }
 }

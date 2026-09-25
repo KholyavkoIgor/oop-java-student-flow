@@ -4,41 +4,74 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
- * Студент как класс.
+ * Студент с именем и списком оценок произвольного типа {@code T}.
  * <p>
  * Студенты равны, если равны имена и совпадают списки оценок
  * (кратность оценок учитывается, порядок - нет).
+ * При создании объекта Студент ему может быть задано указание на то, что является корректной оценкой, а что нет.
+ * Если признак корректности не задан, значит все значения данного типа данных являются корректными оценками.
+ * Условие корректности не может быть изменено в течении жизни объекта.
  */
-public class Student {
+
+public class Student<T> {
     /**
      * Поля класса Student.
-     * @param name - имя студента
-     * @param grades - список оценок студента
+     * @param name имя студента
+     * @param grades список оценок студента
+     * @param validityRule правило корректности
      */
     private String name;
-    private List<Integer> grades;
+    private final List<T> grades;
+    private final Predicate<T> validityRule;
+
     //constructors
 
     /**
      * Создаёт студента с именем и пустым списком оценок.
-     * @param name
+     * Правило корректности не задано, допустимы любые значения типа {@code T}.
+     * @param name имя студента, не может быть {@code null} или пустой строкой
      */
-    public Student(String name){
-        this.name = name;
-        this.grades = new ArrayList<>();
+    public Student(String name) {
+        this(name, List.of(), t -> true);
+    }
+
+    /**
+     * Создаёт студента с именем и правилом корректности оценки.
+     * @param name имя студента, не может быть {@code null} или пустой строкой
+     * @param validityRule правило, определяющее корректность оценки
+     */
+    public Student(String name, Predicate<T> validityRule){
+        this(name, List.of(), validityRule);
     }
 
     /**
      * Создаёт студента с именем и начальным списком оценок.
-     * При передаче список копируется, чтобы изменения исходного списка не изменяли состояния студента.
-     * @param name
-     * @param grades
+     * Правило корректности не задано, допустимы любые значения типа {@code T}.
+     * @param name имя студента, не может быть {@code null} или пустой строкой
+     * @param grades список оценок студента
      */
-    public Student(String name,List<Integer> grades){
-        this.name = name;
-        this.grades = new ArrayList<>(grades);
+    public Student(String name, List<T> grades) {
+        this(name, grades, t -> true);
+    }
+
+    /**
+     * Создаёт студента с именем, начальным списком оценок и правилом корректности оценки.
+     *
+     * @param name имя студента, не может быть {@code null} или пустой строкой
+     * @param grades список оценок студента
+     * @param validityRule правило корректности
+     * @throws IllegalArgumentException если имя {@code null} или пустое
+     */
+    public Student(String name, List<T> grades, Predicate<T> validityRule) {
+        setName(name);
+        this.grades = new ArrayList<>();
+        this.validityRule = validityRule;
+        for (T grade : grades) {
+            addGrade(grade);
+        }
     }
     //Getters:
 
@@ -54,24 +87,32 @@ public class Student {
      * Возвращает копию текущего списка оценок студента.
      * @return копия списка оценок
      */
-    public List<Integer> getGrades(){
+    public List<T> getGrades(){
         return new ArrayList<>(grades);
     }
     //Setters
 
     /**
      * Меняет имя студента на новое.
-     * @param nameNew новое имя студента
+     * @param nameNew новое имя студента, не может быть {@code null} или пустой строкой
+     * @throws IllegalArgumentException если имя {@code null} или пустое
      */
     public void setName(String nameNew){
+        if(nameNew == null||nameNew.isEmpty()){
+            throw new IllegalArgumentException("[!] Name is empty or null");
+        }
         this.name = nameNew;
     }
 
     /**
      * добавлет студенту оценку в список оценок.
      * @param grade добавляемая оценка
+     * @throws InvalidGradeException если оценка не проходит правило корректности
      */
-    public void addGrade(int grade){
+    public void addGrade(T grade){
+        if(!validityRule.test(grade)){
+            throw new InvalidGradeException(grade);
+        }
         grades.add(grade);
     }
 
@@ -79,8 +120,8 @@ public class Student {
      * Удаляет из списка оценок студента первое вхождение оценки с заданным значением.
      * @param grade заданное значение оценки на удаление
      */
-    public void removeGrade(int grade){
-        grades.remove(Integer.valueOf(grade));
+    public void removeGrade(T grade){
+        grades.remove(grade);
     }
 
     /**
@@ -94,12 +135,12 @@ public class Student {
     public boolean equals(Object o){
         if (this == o) return true;
         if (!(o instanceof Student)) return false;
-        Student other = (Student) o;
+        Student<?> other = (Student<?>) o;
 
-        List<Integer> thisSorted = new ArrayList<>(this.grades);
-        List<Integer> otherSorted = new ArrayList<>(other.grades);
-        Collections.sort(thisSorted);
-        Collections.sort(otherSorted);
+        List<?> thisSorted = new ArrayList<>(this.grades);
+        List<?> otherSorted = new ArrayList<>(other.grades);
+        thisSorted.sort(null);
+        otherSorted.sort(null);
 
         return Objects.equals(this.name, other.name)
                 && thisSorted.equals(otherSorted);
@@ -113,8 +154,8 @@ public class Student {
      */
     @Override
     public int hashCode(){
-        List<Integer> sorted = new ArrayList<>(grades);
-        Collections.sort(sorted);
+        List<T> sorted = new ArrayList<>(grades);
+        sorted.sort(null);
         return Objects.hash(name, sorted);
     }
 
