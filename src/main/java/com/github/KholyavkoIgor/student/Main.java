@@ -42,13 +42,16 @@ public class Main {
         Student<Integer> stewdent6 = new Student<>("Галина", List.of(3, 3, 3));
         System.out.println("stewdent5 равен stewdent6 (разная кратность): " + stewdent5.equals(stewdent6));
 
-        /*
+
         Predicate<Integer> evenOnly = x -> x % 2 == 0;
         Student<Integer> stewdent7 = new Student<>("Дмитрий", evenOnly);
         stewdent7.addGrade(4);
-        stewdent7.addGrade(3);//InvalidGradeException
-        */
-
+        try {
+            stewdent7.addGrade(3);
+        }
+        catch (InvalidGradeException e){
+            System.out.println("Expected error: " + e.getMessage());
+        }
         Predicate<String> neDiff = s -> s.equals("зачет") || s.equals("незачет");
         Student<String> stewdent8 = new Student<>("Егор", neDiff);
         stewdent8.addGrade("зачет");
@@ -57,6 +60,24 @@ public class Main {
         System.out.println("stewdent8 не равен stewdent6 (inconvertible types): " + stewdent8.equals(stewdent6));
         System.out.println("Оценки студента " + stewdent8.getName() + ": "
                 + stewdent8.getGrades());
+        //new Student<>("Аня", null); // ambiguous method call
 
+        Student<Integer> s = new Student<>("Андрей", List.of(4, 5));
+        System.out.println(s); // Андрей: [4, 5]
+        s.addGrade(3);
+        System.out.println(s); // Андрей: [4, 5, 3]
+
+        s.undo();
+        System.out.println(s); // Андрей: [4, 5]
+
+        s.setName("Артём");
+        System.out.println(s.getName()); //Артём
+        s.undo();
+        System.out.println(s.getName()); // Андрей
+        try {
+            s.undo();
+        } catch (IllegalStateException e) {
+            System.out.println("Expected error: " + e.getMessage());
+        }
     }
 }

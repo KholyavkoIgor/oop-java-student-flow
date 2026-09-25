@@ -1,7 +1,9 @@
 package com.github.KholyavkoIgor.student;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -26,7 +28,23 @@ public class Student<T> {
     private String name;
     private final List<T> grades;
     private final Predicate<T> validityRule;
+    private final ArrayDeque<UndoAction> history = new ArrayDeque<>();
 
+    //Interface to make alterations reversible
+    @FunctionalInterface
+    private interface UndoAction{
+        void undo();
+    }
+
+    /**
+     * @throws IllegalStateException если нет действий для отмены
+     */
+    public void undo(){
+        if (history.isEmpty()){
+            throw new IllegalStateException("[!] No actions to undo");
+        }
+        history.pop().undo();
+    }
     //constructors
 
     /**
@@ -59,7 +77,7 @@ public class Student<T> {
 
     /**
      * Создаёт студента с именем, начальным списком оценок и правилом корректности оценки.
-     *
+     * Заполнение оценками при создании не влияет на историю.
      * @param name имя студента, не может быть {@code null} или пустой строкой
      * @param grades список оценок студента
      * @param validityRule правило корректности
@@ -72,6 +90,7 @@ public class Student<T> {
         for (T grade : grades) {
             addGrade(grade);
         }
+        history.clear();
     }
     //Getters:
 
@@ -101,7 +120,9 @@ public class Student<T> {
         if(nameNew == null||nameNew.isEmpty()){
             throw new IllegalArgumentException("[!] Name is empty or null");
         }
+        String oldName = this.name;
         this.name = nameNew;
+        history.push(() -> this.name = oldName);
     }
 
     /**
@@ -114,6 +135,7 @@ public class Student<T> {
             throw new InvalidGradeException(grade);
         }
         grades.add(grade);
+        history.push(() -> grades.remove(grades.size()-1)); //delete last element
     }
 
     /**
@@ -121,6 +143,12 @@ public class Student<T> {
      * @param grade заданное значение оценки на удаление
      */
     public void removeGrade(T grade){
+        int gradeindex = grades.indexOf(grade);
+        if (gradeindex == -1) {
+            return;
+        }
+        grades.remove(gradeindex);
+        history.push(()->grades.add(gradeindex,grade));
         grades.remove(grade);
     }
 
