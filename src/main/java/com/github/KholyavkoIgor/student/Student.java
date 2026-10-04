@@ -2,8 +2,8 @@ package com.github.KholyavkoIgor.student;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
+//import java.util.Collections;
+//import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -117,7 +117,7 @@ public class Student<T> {
      * @throws IllegalArgumentException если имя {@code null} или пустое
      */
     public void setName(String nameNew){
-        if(nameNew == null||nameNew.isEmpty()){
+        if(nameNew == null || nameNew.isEmpty()){
             throw new IllegalArgumentException("[!] Name is empty or null");
         }
         String oldName = this.name;
@@ -149,7 +149,6 @@ public class Student<T> {
         }
         grades.remove(gradeindex);
         history.push(()->grades.add(gradeindex,grade));
-        grades.remove(grade);
     }
 
     /**

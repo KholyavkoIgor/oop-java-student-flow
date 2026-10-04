@@ -1,5 +1,6 @@
 package com.github.KholyavkoIgor.student;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -76,6 +77,20 @@ public class Main {
         System.out.println(s.getName()); // Андрей
         try {
             s.undo();
+        } catch (IllegalStateException e) {
+            System.out.println("Expected error: " + e.getMessage());
+        }
+        System.out.println(Flow.of(1, -2, 3).filter(x -> x > 0).reduce(Integer::sum)); // 4
+        
+        List<Integer> squares = Flow.of(List.of(1, 2, 3, 4))
+                .map(x -> x * x)
+                .collect(ArrayList::new, List::add);                                  // [1, 4, 9, 16]
+        System.out.println(squares);
+
+        System.out.println(Flow.iterate(1, x -> x * 2, x -> x < 100).reduce(Integer::sum)); // 127
+
+        try {
+            Flow.of(1, 2).filter(x -> x > 10).reduce(Integer::sum);
         } catch (IllegalStateException e) {
             System.out.println("Expected error: " + e.getMessage());
         }
